@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+msg=$1
+tmp="$msg.tmp"
+
+grep -vi 'Co-authored-by' "$msg" | grep -vi 'Generated-by' > "$tmp" &&
+mv "$tmp" "$msg"
