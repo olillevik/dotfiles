@@ -25,6 +25,7 @@ Use this skill when the user wants release notes, a changelog entry, or a pull r
 1. Identify the artifact and audience.
    - Decide whether the user needs release notes, a changelog entry, a PR summary, or more than one artifact.
    - Match the tone and structure to the target audience instead of forcing a rigid format.
+   - For a plain PR summary with no requested template, default to short prose rather than headings and bullets.
 
 2. Gather the evidence that best explains the change.
    - Prefer diffs, commit ranges, PR descriptions, issue links, and related context over filenames alone.
@@ -39,6 +40,9 @@ Use this skill when the user wants release notes, a changelog entry, or a pull r
    - Lead with the most important impact.
    - Keep the output concise, scannable, and ready to paste into a PR, changelog, or release note.
    - If something is uncertain, say so plainly instead of overstating the change.
+   - For PR bodies, prefer one short paragraph or two short paragraphs unless the user explicitly wants headings, a checklist, or bullets.
+   - Do not add generic headings like `Summary` or `Notes` unless they add real structure.
+   - Use bullets only when there are several distinct items that are genuinely easier to scan as a list.
 
 5. Keep neighboring workflows separate.
    - If the request also includes a commit message request, reuse `git-commit` for that part.
@@ -51,9 +55,11 @@ Use this skill when the user wants release notes, a changelog entry, or a pull r
 - Clear about breaking changes, risks, and upgrade steps when relevant
 - Separate artifacts when both release text and commit text are requested
 - Concise enough to use directly with minimal editing
+- Plain PR summaries default to concise prose, not empty headings plus bullets
 
 ## Examples
 - "Write release notes for v2.3.0..HEAD and highlight anything customers need to know."
 - "Summarize this PR in a short PR body with rollout notes."
 - "Draft release notes for the staged changes, then reuse `git-commit` to handle the commit message."
 - "Turn this compare diff into a changelog entry for internal release notes."
+- PR summary example: `This adds shared skills for GitHub Copilot CLI and Claude Code, along with an install script and setup documentation so both tools can use the same repository-managed skill set.`
