@@ -11,6 +11,7 @@ compatibility: Claude Code, GitHub Copilot CLI
 - Apply Sopra Steria colors, typography, and visual identity to the artifact the user is working on
 - Adapt the guidance to slides, documents, UI, diagrams, and similar deliverables
 - Keep the result usable when proprietary fonts or logo files are unavailable
+- Keep the branding restrained so the artifact feels clearly branded without turning into repetitive corporate wallpaper
 
 ## When to use me
 Use this skill when the user explicitly wants **Sopra Steria** branding or asks for Sopra Steria brand rules to be applied. Good triggers include requests about Sopra Steria brand colors, typography, logo usage, corporate identity, visual identity, or styling a specific asset to match Sopra Steria. Do not use it for generic requests like "make this prettier", "format this document", or branding for another company.
@@ -47,23 +48,28 @@ Use this skill when the user explicitly wants **Sopra Steria** branding or asks 
    - If the company or brand is ambiguous, ask instead of assuming Sopra Steria.
 
 2. Identify the artifact and translate the brand to that medium.
-   - Slides and documents: use purple-led headings, dark readable body text, restrained orange accents, and light purple or beige section backgrounds.
-   - Web/UI: expose the brand colors and font stack as reusable theme tokens.
-   - Diagrams: apply the palette sparingly and keep structure readable before decorative styling.
+    - Slides and documents: use purple-led headings, dark readable body text, restrained orange accents, and light purple or beige section backgrounds.
+    - Web/UI: expose the brand colors and font stack as reusable theme tokens.
+    - Diagrams: apply the palette sparingly and keep structure readable before decorative styling.
+   - Prefer visual branding over repeated mentions of the brand name in body copy or headings unless the user explicitly wants the name to appear.
+   - By default, use the logo sparingly. One clear placement is usually better than repeating it on every page or slide.
 
 3. Handle missing brand assets honestly.
    - Do not invent or recreate official logos.
    - If brand fonts are unavailable, use the defined fallbacks and say so plainly.
    - If exact logo placement or asset files matter and are not provided, ask for them.
+   - Do not add brand slogans, taglines, or campaign lines unless the user explicitly asks for them or they are clearly required by the artifact.
 
 4. Deliver the smallest useful branded result.
    - Prefer direct edits, theme variables, style rules, or concise guidance the user can apply immediately.
    - Keep branding faithful without over-decorating the artifact.
+   - For presentations, default to one branded opening treatment and optional subtle closing treatment rather than branding every slide aggressively.
 
 ## Output expectations
 - The output clearly reflects Sopra Steria visual identity
 - Color and typography choices are concrete enough to implement
 - Assumptions about missing fonts or logos are explicit
+- Branding is applied with restraint: no unnecessary repetition of the company name, no excessive logo repetition, and no slogan unless requested
 - The skill stays focused on brand application, not generic writing or unrelated design work
 
 ## Examples
