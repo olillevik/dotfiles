@@ -39,11 +39,14 @@ link_skills_dir() {
       return
     fi
 
+    # Replace an existing symlink that points elsewhere
     rm "$target"
   elif [[ -e "$target" ]]; then
-    printf 'Refusing to replace existing non-symlink path: %s\n' "$target" >&2
-    printf 'Move it away or remove it, then rerun install.sh\n' >&2
-    exit 1
+    # Backup existing non-symlink path instead of refusing to replace it.
+    local backup
+    backup="${target}.backup.$(date +%s)"
+    printf 'Backing up existing path: %s -> %s\n' "$target" "$backup"
+    mv "$target" "$backup"
   fi
 
   ln -s "$SOURCE_SKILLS_DIR" "$target"
