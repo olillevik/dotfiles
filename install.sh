@@ -8,6 +8,7 @@ SOURCE_HOOKS_DIR="$SCRIPT_DIR/hooks/git"
 SOURCE_COMMIT_MSG_HOOK="$SOURCE_HOOKS_DIR/commit-msg"
 GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
 TARGET_COMMIT_MSG_HOOK="$GLOBAL_HOOKS_DIR/commit-msg"
+MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
 
 if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   printf 'Expected skills directory at %s\n' "$SOURCE_SKILLS_DIR" >&2
@@ -19,38 +20,65 @@ if [[ ! -f "$SOURCE_COMMIT_MSG_HOOK" ]]; then
   exit 1
 fi
 
-TARGETS=(
+SKILL_TARGETS=(
   "$HOME/.copilot/skills"
   "$HOME/.claude/skills"
 )
 
-link_skills_dir() {
-  local target="$1"
-  local parent
-  parent="$(dirname "$target")"
+sync_mattpocock_skills() {
+  if [[ -d "$MATTPOCOCK_SKILLS_DIR/.git" ]]; then
+    printf 'Updating mattpocock/skills at %s\n' "$MATTPOCOCK_SKILLS_DIR"
+    git -C "$MATTPOCOCK_SKILLS_DIR" pull --ff-only
+  else
+    printf 'Cloning mattpocock/skills to %s\n' "$MATTPOCOCK_SKILLS_DIR"
+    git clone --depth=1 https://github.com/mattpocock/skills.git "$MATTPOCOCK_SKILLS_DIR"
+  fi
+}
 
-  mkdir -p "$parent"
+link_skill_into() {
+  local skill_src="$1"
+  local target_dir="$2"
+  local name
+  name="$(basename "$skill_src")"
+  local target="$target_dir/$name"
 
-  if [[ -L "$target" ]]; then
-    local current
-    current="$(readlink "$target")"
-    if [[ "$current" == "$SOURCE_SKILLS_DIR" ]]; then
-      printf 'Already linked: %s -> %s\n' "$target" "$SOURCE_SKILLS_DIR"
-      return
-    fi
-
-    # Replace an existing symlink that points elsewhere
-    rm "$target"
-  elif [[ -e "$target" ]]; then
-    # Backup existing non-symlink path instead of refusing to replace it.
-    local backup
-    backup="${target}.backup.$(date +%s)"
+  if [[ -e "$target" ]] && [[ ! -L "$target" ]]; then
+    local backup="${target}.backup.$(date +%s)"
     printf 'Backing up existing path: %s -> %s\n' "$target" "$backup"
     mv "$target" "$backup"
   fi
 
-  ln -s "$SOURCE_SKILLS_DIR" "$target"
-  printf 'Linked: %s -> %s\n' "$target" "$SOURCE_SKILLS_DIR"
+  ln -sfn "$skill_src" "$target"
+  printf '  linked %s\n' "$name"
+}
+
+link_all_skills() {
+  local target_dir="$1"
+  local parent
+  parent="$(dirname "$target_dir")"
+  mkdir -p "$parent"
+
+  # If target is an old whole-directory symlink, remove it so we can make a real dir
+  if [[ -L "$target_dir" ]]; then
+    rm "$target_dir"
+  fi
+  mkdir -p "$target_dir"
+
+  printf 'Linking local skills into %s\n' "$target_dir"
+  while IFS= read -r -d '' skill_md; do
+    link_skill_into "$(dirname "$skill_md")" "$target_dir"
+  done < <(find "$SOURCE_SKILLS_DIR" -maxdepth 2 -name SKILL.md -print0)
+
+  printf 'Linking mattpocock skills into %s\n' "$target_dir"
+  while IFS= read -r -d '' skill_md; do
+    local skill_dir
+    skill_dir="$(dirname "$skill_md")"
+    # Skip deprecated and in-progress categories
+    case "$skill_dir" in
+      *deprecated*|*in-progress*) continue ;;
+    esac
+    link_skill_into "$skill_dir" "$target_dir"
+  done < <(find "$MATTPOCOCK_SKILLS_DIR/skills" -name SKILL.md -print0)
 }
 
 ensure_global_hooks_path() {
@@ -98,8 +126,10 @@ link_commit_msg_hook() {
   printf 'Linked: %s -> %s\n' "$TARGET_COMMIT_MSG_HOOK" "$SOURCE_COMMIT_MSG_HOOK"
 }
 
-for target in "${TARGETS[@]}"; do
-  link_skills_dir "$target"
+sync_mattpocock_skills
+
+for target in "${SKILL_TARGETS[@]}"; do
+  link_all_skills "$target"
 done
 
 ensure_global_hooks_path
