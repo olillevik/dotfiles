@@ -3,6 +3,7 @@ name: git-commit
 description: Create a concise git commit or commit subject from staged and unstaged changes compared with what is already committed. Use when the user asks to commit work or write a message from the current diff, not for release notes, changelogs, or PR summaries.
 license: MIT
 compatibility: Claude Code, GitHub Copilot CLI
+model: claude-haiku-4.5
 ---
 
 # Git Commit
