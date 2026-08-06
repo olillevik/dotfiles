@@ -6,12 +6,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_SKILLS_DIR="$SCRIPT_DIR/skills"
 SOURCE_HOOKS_DIR="$SCRIPT_DIR/hooks/git"
 SOURCE_COMMIT_MSG_HOOK="$SOURCE_HOOKS_DIR/commit-msg"
+SOURCE_AGENTS_MD="$SCRIPT_DIR/AGENTS.md"
 GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
 TARGET_COMMIT_MSG_HOOK="$GLOBAL_HOOKS_DIR/commit-msg"
 MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
 
 if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   printf 'Expected skills directory at %s\n' "$SOURCE_SKILLS_DIR" >&2
+  exit 1
+fi
+
+if [[ ! -f "$SOURCE_AGENTS_MD" ]]; then
+  printf 'Expected instruction file at %s\n' "$SOURCE_AGENTS_MD" >&2
   exit 1
 fi
 
@@ -23,6 +29,13 @@ fi
 SKILL_TARGETS=(
   "$HOME/.copilot/skills"
   "$HOME/.claude/skills"
+)
+
+# Both names point at the same file. Claude Code reads CLAUDE.md, other agents read AGENTS.md.
+INSTRUCTION_TARGETS=(
+  "$HOME/.claude/AGENTS.md"
+  "$HOME/.claude/CLAUDE.md"
+  "$HOME/.copilot/AGENTS.md"
 )
 
 sync_mattpocock_skills() {
@@ -42,10 +55,10 @@ link_skill_into() {
   name="$(basename "$skill_src")"
   local target="$target_dir/$name"
 
+  # Everything here is a copy of something in git. Replace it.
   if [[ -e "$target" ]] && [[ ! -L "$target" ]]; then
-    local backup="${target}.backup.$(date +%s)"
-    printf 'Backing up existing path: %s -> %s\n' "$target" "$backup"
-    mv "$target" "$backup"
+    printf 'Replacing existing path: %s\n' "$target"
+    rm -rf "$target"
   fi
 
   ln -sfn "$skill_src" "$target"
@@ -64,6 +77,13 @@ link_all_skills() {
   fi
   mkdir -p "$target_dir"
 
+  # Upstream renames and deletions leave symlinks pointing at nothing.
+  local dead
+  while IFS= read -r -d '' dead; do
+    printf 'Removing dead symlink: %s\n' "$dead"
+    rm "$dead"
+  done < <(find "$target_dir" -maxdepth 1 -type l ! -exec test -e {} \; -print0)
+
   printf 'Linking local skills into %s\n' "$target_dir"
   while IFS= read -r -d '' skill_md; do
     link_skill_into "$(dirname "$skill_md")" "$target_dir"
@@ -79,6 +99,27 @@ link_all_skills() {
     esac
     link_skill_into "$skill_dir" "$target_dir"
   done < <(find "$MATTPOCOCK_SKILLS_DIR/skills" -name SKILL.md -print0)
+}
+
+link_instructions() {
+  local target
+  for target in "${INSTRUCTION_TARGETS[@]}"; do
+    mkdir -p "$(dirname "$target")"
+
+    if [[ -L "$target" ]]; then
+      if [[ "$(readlink "$target")" == "$SOURCE_AGENTS_MD" ]]; then
+        printf 'Already linked: %s -> %s\n' "$target" "$SOURCE_AGENTS_MD"
+        continue
+      fi
+      rm "$target"
+    elif [[ -e "$target" ]]; then
+      printf 'Replacing existing file: %s\n' "$target"
+      rm -rf "$target"
+    fi
+
+    ln -s "$SOURCE_AGENTS_MD" "$target"
+    printf 'Linked: %s -> %s\n' "$target" "$SOURCE_AGENTS_MD"
+  done
 }
 
 ensure_global_hooks_path() {
@@ -131,6 +172,8 @@ sync_mattpocock_skills
 for target in "${SKILL_TARGETS[@]}"; do
   link_all_skills "$target"
 done
+
+link_instructions
 
 ensure_global_hooks_path
 link_commit_msg_hook
