@@ -2,10 +2,22 @@
 
 This repository contains shared skills for GitHub Copilot CLI and Claude Code.
 
-`install.sh` creates symlinks so these tool-specific paths all point to this repository's `skills/` directory:
+`install.sh` links each skill directory separately into these two paths, one symlink per skill:
 
 - `~/.copilot/skills`
 - `~/.claude/skills`
+
+It links the skills in this repository's `skills/` directory and the skills from `mattpocock/skills`, which it clones to `~/.mattpocock-skills`.
+
+The installer keeps no backups. Anything it finds in the way is replaced, on the assumption that the content it manages lives in git. It also removes symlinks that no longer resolve, which is what upstream renames and deletions leave behind.
+
+It also links `AGENTS.md`, the shared writing-style instructions, into the three places agents look for global instructions:
+
+- `~/.claude/AGENTS.md`
+- `~/.claude/CLAUDE.md`
+- `~/.copilot/AGENTS.md`
+
+All three are symlinks to the same file. An existing file at any of those paths is replaced. `AGENTS.md` starts with `@~/.claude/RTK.md`, so the RTK instructions still load.
 
 It also installs a global `commit-msg` hook through `~/.git-templates/hooks` and configures `git config --global core.hooksPath` to point there.
 
@@ -30,8 +42,14 @@ Run the installer:
 Expected output:
 
 ```text
-Linked: /Users/your-user/.copilot/skills -> /path/to/your/dotfiles/skills
-Linked: /Users/your-user/.claude/skills -> /path/to/your/dotfiles/skills
+Linking local skills into /Users/your-user/.copilot/skills
+  linked git-commit
+  linked terse
+Linking mattpocock skills into /Users/your-user/.copilot/skills
+  linked writing-tests
+Linked: /Users/your-user/.claude/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
+Linked: /Users/your-user/.claude/CLAUDE.md -> /path/to/your/dotfiles/AGENTS.md
+Linked: /Users/your-user/.copilot/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
 Configured git core.hooksPath: /Users/your-user/.git-templates/hooks
 Linked: /Users/your-user/.git-templates/hooks/commit-msg -> /path/to/your/dotfiles/hooks/git/commit-msg
 ```
