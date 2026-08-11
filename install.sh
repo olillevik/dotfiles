@@ -7,6 +7,7 @@ SOURCE_SKILLS_DIR="$SCRIPT_DIR/skills"
 SOURCE_HOOKS_DIR="$SCRIPT_DIR/hooks/git"
 SOURCE_COMMIT_MSG_HOOK="$SOURCE_HOOKS_DIR/commit-msg"
 SOURCE_AGENTS_MD="$SCRIPT_DIR/AGENTS.md"
+SOURCE_MINIMALIST_MD="$SCRIPT_DIR/minimalist-engineering.md"
 GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
 TARGET_COMMIT_MSG_HOOK="$GLOBAL_HOOKS_DIR/commit-msg"
 MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
@@ -26,6 +27,11 @@ if [[ ! -f "$SOURCE_COMMIT_MSG_HOOK" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$SOURCE_MINIMALIST_MD" ]]; then
+  printf 'Expected principles file at %s\n' "$SOURCE_MINIMALIST_MD" >&2
+  exit 1
+fi
+
 SKILL_TARGETS=(
   "$HOME/.copilot/skills"
   "$HOME/.claude/skills"
@@ -37,6 +43,9 @@ INSTRUCTION_TARGETS=(
   "$HOME/.claude/CLAUDE.md"
   "$HOME/.copilot/AGENTS.md"
 )
+
+# AGENTS.md points agents at this path, so both tools resolve it there.
+MINIMALIST_TARGET="$HOME/.claude/minimalist-engineering.md"
 
 sync_mattpocock_skills() {
   if [[ -d "$MATTPOCOCK_SKILLS_DIR/.git" ]]; then
@@ -122,6 +131,24 @@ link_instructions() {
   done
 }
 
+link_minimalist_principles() {
+  mkdir -p "$(dirname "$MINIMALIST_TARGET")"
+
+  if [[ -L "$MINIMALIST_TARGET" ]]; then
+    if [[ "$(readlink "$MINIMALIST_TARGET")" == "$SOURCE_MINIMALIST_MD" ]]; then
+      printf 'Already linked: %s -> %s\n' "$MINIMALIST_TARGET" "$SOURCE_MINIMALIST_MD"
+      return
+    fi
+    rm "$MINIMALIST_TARGET"
+  elif [[ -e "$MINIMALIST_TARGET" ]]; then
+    printf 'Replacing existing file: %s\n' "$MINIMALIST_TARGET"
+    rm -rf "$MINIMALIST_TARGET"
+  fi
+
+  ln -s "$SOURCE_MINIMALIST_MD" "$MINIMALIST_TARGET"
+  printf 'Linked: %s -> %s\n' "$MINIMALIST_TARGET" "$SOURCE_MINIMALIST_MD"
+}
+
 ensure_global_hooks_path() {
   local current
   current="$(git config --global --get core.hooksPath || true)"
@@ -174,6 +201,7 @@ for target in "${SKILL_TARGETS[@]}"; do
 done
 
 link_instructions
+link_minimalist_principles
 
 ensure_global_hooks_path
 link_commit_msg_hook

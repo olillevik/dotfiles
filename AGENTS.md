@@ -1,5 +1,10 @@
 @~/.claude/RTK.md
 
+# Engineering
+
+When writing or reviewing code, read and follow the minimalist engineering
+principles in `~/.claude/minimalist-engineering.md`.
+
 # Writing style
 
 Rules for prose you write for me. Not for code, and not for text you are quoting.

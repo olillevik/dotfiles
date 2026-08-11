@@ -19,6 +19,8 @@ It also links `AGENTS.md`, the shared writing-style instructions, into the three
 
 All three are symlinks to the same file. An existing file at any of those paths is replaced. `AGENTS.md` starts with `@~/.claude/RTK.md`, so the RTK instructions still load.
 
+It also links `minimalist-engineering.md` to `~/.claude/minimalist-engineering.md`. `AGENTS.md` points agents at that path and tells them to read it when writing or reviewing code, so the principles load on demand rather than into every session.
+
 It also installs a global `commit-msg` hook through `~/.git-templates/hooks` and configures `git config --global core.hooksPath` to point there.
 
 After installation, both tools will read the same skill files through those symlinks, and Git will use the shared hook setup.
