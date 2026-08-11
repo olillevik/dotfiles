@@ -11,13 +11,12 @@ It links the skills in this repository's `skills/` directory and the skills from
 
 The installer keeps no backups. Anything it finds in the way is replaced, on the assumption that the content it manages lives in git. It also removes symlinks that no longer resolve, which is what upstream renames and deletions leave behind.
 
-It also links `AGENTS.md`, the shared writing-style instructions, into the three places agents look for global instructions:
+It also links `AGENTS.md`, the shared writing-style instructions, into the two places agents look for global instructions:
 
-- `~/.claude/AGENTS.md`
 - `~/.claude/CLAUDE.md`
 - `~/.copilot/AGENTS.md`
 
-All three are symlinks to the same file. An existing file at any of those paths is replaced. `AGENTS.md` starts with `@~/.claude/RTK.md`, so the RTK instructions still load.
+Claude Code reads `CLAUDE.md`, not `AGENTS.md`; Copilot CLI reads `AGENTS.md`. Both are symlinks to the same file. An existing file at either path is replaced.
 
 It also links `minimalist-engineering.md` to `~/.claude/minimalist-engineering.md`. `AGENTS.md` points agents at that path and tells them to read it when writing or reviewing code, so the principles load on demand rather than into every session.
 
@@ -49,7 +48,6 @@ Linking local skills into /Users/your-user/.copilot/skills
   linked terse
 Linking mattpocock skills into /Users/your-user/.copilot/skills
   linked writing-tests
-Linked: /Users/your-user/.claude/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
 Linked: /Users/your-user/.claude/CLAUDE.md -> /path/to/your/dotfiles/AGENTS.md
 Linked: /Users/your-user/.copilot/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
 Configured git core.hooksPath: /Users/your-user/.git-templates/hooks

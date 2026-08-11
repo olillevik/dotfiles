@@ -37,9 +37,8 @@ SKILL_TARGETS=(
   "$HOME/.claude/skills"
 )
 
-# Both names point at the same file. Claude Code reads CLAUDE.md, other agents read AGENTS.md.
+# Claude Code reads CLAUDE.md, not AGENTS.md; Copilot CLI reads AGENTS.md.
 INSTRUCTION_TARGETS=(
-  "$HOME/.claude/AGENTS.md"
   "$HOME/.claude/CLAUDE.md"
   "$HOME/.copilot/AGENTS.md"
 )

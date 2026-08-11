@@ -1,5 +1,3 @@
-@~/.claude/RTK.md
-
 # Engineering
 
 When writing or reviewing code, read and follow the minimalist engineering
