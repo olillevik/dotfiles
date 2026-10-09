@@ -112,7 +112,6 @@ link_all_skills() {
     link_skill_into "$skill_dir" "$target_dir"
   done < <(find "$MATTPOCOCK_SKILLS_DIR/skills" -name SKILL.md -print0)
 
-  # Only show-me is taken from humanlayer/skills; the rest of that repo stays out.
   if [[ ! -f "$HUMANLAYER_SHOW_ME_DIR/SKILL.md" ]]; then
     printf 'Expected show-me skill at %s\n' "$HUMANLAYER_SHOW_ME_DIR" >&2
     exit 1
