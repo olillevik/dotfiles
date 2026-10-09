@@ -7,7 +7,9 @@ This repository contains shared skills for GitHub Copilot CLI and Claude Code.
 - `~/.copilot/skills`
 - `~/.claude/skills`
 
-It links the skills in this repository's `skills/` directory and the skills from `mattpocock/skills`, which it clones to `~/.mattpocock-skills`.
+It links the skills in this repository's `skills/` directory, the skills from `mattpocock/skills` (cloned to `~/.mattpocock-skills`), and the `show-me` skill from `humanlayer/skills` (cloned to `~/.humanlayer-skills`). Only `show-me` is taken from the humanlayer repository.
+
+Each run pulls both upstream clones with `git pull --ff-only` before linking.
 
 The installer keeps no backups. Anything it finds in the way is replaced, on the assumption that the content it manages lives in git. It also removes symlinks that no longer resolve, which is what upstream renames and deletions leave behind.
 
@@ -48,6 +50,8 @@ Linking local skills into /Users/your-user/.copilot/skills
   linked terse
 Linking mattpocock skills into /Users/your-user/.copilot/skills
   linked writing-tests
+Linking humanlayer show-me skill into /Users/your-user/.copilot/skills
+  linked show-me
 Linked: /Users/your-user/.claude/CLAUDE.md -> /path/to/your/dotfiles/AGENTS.md
 Linked: /Users/your-user/.copilot/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
 Configured git core.hooksPath: /Users/your-user/.git-templates/hooks
