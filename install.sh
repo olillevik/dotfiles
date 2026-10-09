@@ -11,6 +11,8 @@ SOURCE_MINIMALIST_MD="$SCRIPT_DIR/minimalist-engineering.md"
 GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
 TARGET_COMMIT_MSG_HOOK="$GLOBAL_HOOKS_DIR/commit-msg"
 MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
+HUMANLAYER_SKILLS_DIR="$HOME/.humanlayer-skills"
+HUMANLAYER_SHOW_ME_DIR="$HUMANLAYER_SKILLS_DIR/plugins/show-me/skills/show-me"
 
 if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   printf 'Expected skills directory at %s\n' "$SOURCE_SKILLS_DIR" >&2
@@ -46,13 +48,15 @@ INSTRUCTION_TARGETS=(
 # AGENTS.md points agents at this path, so both tools resolve it there.
 MINIMALIST_TARGET="$HOME/.claude/minimalist-engineering.md"
 
-sync_mattpocock_skills() {
-  if [[ -d "$MATTPOCOCK_SKILLS_DIR/.git" ]]; then
-    printf 'Updating mattpocock/skills at %s\n' "$MATTPOCOCK_SKILLS_DIR"
-    git -C "$MATTPOCOCK_SKILLS_DIR" pull --ff-only
+sync_skill_repo() {
+  local url="$1"
+  local dir="$2"
+  if [[ -d "$dir/.git" ]]; then
+    printf 'Updating %s at %s\n' "$url" "$dir"
+    git -C "$dir" pull --ff-only
   else
-    printf 'Cloning mattpocock/skills to %s\n' "$MATTPOCOCK_SKILLS_DIR"
-    git clone --depth=1 https://github.com/mattpocock/skills.git "$MATTPOCOCK_SKILLS_DIR"
+    printf 'Cloning %s to %s\n' "$url" "$dir"
+    git clone --depth=1 "$url" "$dir"
   fi
 }
 
@@ -107,6 +111,14 @@ link_all_skills() {
     esac
     link_skill_into "$skill_dir" "$target_dir"
   done < <(find "$MATTPOCOCK_SKILLS_DIR/skills" -name SKILL.md -print0)
+
+  if [[ ! -f "$HUMANLAYER_SHOW_ME_DIR/SKILL.md" ]]; then
+    printf 'Expected show-me skill at %s\n' "$HUMANLAYER_SHOW_ME_DIR" >&2
+    exit 1
+  fi
+
+  printf 'Linking humanlayer show-me skill into %s\n' "$target_dir"
+  link_skill_into "$HUMANLAYER_SHOW_ME_DIR" "$target_dir"
 }
 
 link_instructions() {
@@ -193,7 +205,8 @@ link_commit_msg_hook() {
   printf 'Linked: %s -> %s\n' "$TARGET_COMMIT_MSG_HOOK" "$SOURCE_COMMIT_MSG_HOOK"
 }
 
-sync_mattpocock_skills
+sync_skill_repo https://github.com/mattpocock/skills.git "$MATTPOCOCK_SKILLS_DIR"
+sync_skill_repo https://github.com/humanlayer/skills.git "$HUMANLAYER_SKILLS_DIR"
 
 for target in "${SKILL_TARGETS[@]}"; do
   link_all_skills "$target"
