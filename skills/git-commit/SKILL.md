@@ -15,7 +15,7 @@ model: claude-haiku-4.5
 - Create a one-line commit by default when the user asks to commit
 
 ## When to use me
-Use this skill when the user wants to commit current repository changes or wants a commit message based on the current diff. Check both staged and unstaged work before drafting the subject. Do not use it for release notes, changelog entries, or pull request summaries; those belong to `release-helper`, which can reuse `git-commit` for the commit-message part of a mixed request.
+Use this skill when the user wants to commit current repository changes or wants a commit message based on the current diff. Check both staged and unstaged work before drafting the subject. Do not use it for release notes, changelog entries, or pull request summaries.
 
 ## Inputs or prerequisites
 - A git repository
@@ -60,7 +60,6 @@ Use this skill when the user wants to commit current repository changes or wants
 
 5. Keep boundaries clear.
    - If the request also includes release notes, a changelog entry, or a PR summary, keep this skill focused on the commit.
-   - Reuse `release-helper` for the release-writing portion.
 
 ## Output expectations
 - The default output is exactly one commit-subject line
