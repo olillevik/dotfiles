@@ -1,4 +1,6 @@
-@~/.claude/RTK.md
+# Engineering
+
+When writing or reviewing code, use the `minimalist-engineering` skill.
 
 # Writing style
 

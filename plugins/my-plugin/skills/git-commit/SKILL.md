@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Create a concise git commit or commit subject from staged and unstaged changes compared with what is already committed. Use when the user asks to commit work or write a message from the current diff, not for release notes, changelogs, or PR summaries.
+description: Create a concise git commit or commit subject from staged and unstaged changes compared with what is already committed. Use this skill for every request to commit, such as "commit this", "commit these changes", or "commit my work", or to write a commit message or subject from the current diff, not for release notes, changelogs, or PR summaries.
 license: MIT
 compatibility: Claude Code, GitHub Copilot CLI
 ---
@@ -14,7 +14,7 @@ compatibility: Claude Code, GitHub Copilot CLI
 - Create a one-line commit by default when the user asks to commit
 
 ## When to use me
-Use this skill when the user wants to commit current repository changes or wants a commit message based on the current diff. Check both staged and unstaged work before drafting the subject. Do not use it for release notes, changelog entries, or pull request summaries; those belong to `release-helper`, which can reuse `git-commit` for the commit-message part of a mixed request.
+Use this skill when the user wants to commit current repository changes or wants a commit message based on the current diff. Check both staged and unstaged work before drafting the subject. Do not use it for release notes, changelog entries, or pull request summaries.
 
 ## Inputs or prerequisites
 - A git repository
@@ -59,7 +59,6 @@ Use this skill when the user wants to commit current repository changes or wants
 
 5. Keep boundaries clear.
    - If the request also includes release notes, a changelog entry, or a PR summary, keep this skill focused on the commit.
-   - Reuse `release-helper` for the release-writing portion.
 
 ## Output expectations
 - The default output is exactly one commit-subject line
