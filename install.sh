@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_NAME=dotfiles
+MARKETPLACE_NAME=dotfiles
+PLUGIN_NAME=my-plugin
 PLUGIN_DIR="$SCRIPT_DIR/plugins/$PLUGIN_NAME"
 SOURCE_SKILLS_DIR="$PLUGIN_DIR/skills"
 SOURCE_HOOKS_DIR="$SCRIPT_DIR/hooks/git"
@@ -101,7 +102,7 @@ register_claude_plugin() {
 
   printf 'Registering %s with Claude Code\n' "$SCRIPT_DIR"
   claude plugin marketplace add "$SCRIPT_DIR"
-  claude plugin install "$PLUGIN_NAME@$PLUGIN_NAME"
+  claude plugin install "$PLUGIN_NAME@$MARKETPLACE_NAME"
 }
 
 link_instructions() {

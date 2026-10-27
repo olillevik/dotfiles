@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PLUGIN_DIR="$REPO_DIR/plugins/dotfiles"
+PLUGIN_DIR="$REPO_DIR/plugins/my-plugin"
 
 UPSTREAM_NAME=""
 REQUESTED_SHA=""
@@ -63,7 +63,7 @@ fi
 SHORT_SHA="${TARGET_SHA:0:7}"
 git -C "$WORK_DIR/upstream" checkout --quiet --detach "$TARGET_SHA"
 
-# A linked skill is a symlink in plugins/dotfiles/skills that points into this copy, for example
+# A linked skill is a symlink in plugins/my-plugin/skills that points into this copy, for example
 # skills/tdd -> ../upstream-mattpocock/skills/engineering/tdd. The part after the copy folder is the path upstream.
 LINKED_FILE="$WORK_DIR/linked.txt"
 : > "$LINKED_FILE"
@@ -167,7 +167,7 @@ BODY_FILE="$WORK_DIR/pr-body.md"
   else
     printf 'None.\n'
   fi
-  printf '\nThe Files tab shows every changed file under plugins/dotfiles/%s/.\n' "$UPSTREAM_NAME"
+  printf '\nThe Files tab shows every changed file under plugins/my-plugin/%s/.\n' "$UPSTREAM_NAME"
 } > "$BODY_FILE"
 
 gh pr create --base main --head "$BRANCH" --title "Update $REPO_SLUG to $SHORT_SHA" --body-file "$BODY_FILE"
