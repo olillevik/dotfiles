@@ -1,6 +1,7 @@
 ---
 name: minimalist-engineering
-description: Keep code minimal and avoid over-engineering. Use when writing, modifying, or reviewing code, or when a design adds abstractions, layers, or dependencies.
+description: Keep code minimal and avoid over-engineering.
+disable-model-invocation: true
 license: MIT
 compatibility: Claude Code, GitHub Copilot CLI
 ---

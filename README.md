@@ -1,19 +1,15 @@
 # Install Shared Skills On Mac
 
-This repository holds shared skills for GitHub Copilot CLI and Claude Code, the shared agent instructions, and a git commit hook.
+This repository holds shared skills for GitHub Copilot CLI and Claude Code, and a git commit hook.
 
 The skills live in one Claude Code plugin, `plugins/my-plugin`. It has two kinds of skills:
 
 - Your own skills, as real folders in `plugins/my-plugin/skills/`.
 - Upstream skills, as symlinks into pinned copies of upstream commits. The engineering skills from [mattpocock/skills](https://github.com/mattpocock/skills) are in `plugins/my-plugin/upstream-mattpocock/`, and `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) is in `plugins/my-plugin/upstream-humanlayer/`. Each copy records its commit in a `PIN.md` file.
 
-`install.sh` registers this checkout as a Claude Code marketplace and installs the `my-plugin` plugin. It links the same skills into `~/.copilot/skills`. It also links `AGENTS.md`, the shared writing-style instructions, into the three places agents look for global instructions:
+`install.sh` registers this checkout as a Claude Code marketplace, installs the `my-plugin` plugin, and links the same skills into `~/.copilot/skills`. It does not create, change, or delete any `AGENTS.md` or `CLAUDE.md` file.
 
-- `~/.claude/AGENTS.md`
-- `~/.claude/CLAUDE.md`
-- `~/.copilot/AGENTS.md`
-
-All three are symlinks to the same file. An existing file at any of those paths is replaced. `AGENTS.md` starts with `@~/.claude/RTK.md`, so the RTK instructions still load.
+Run the `set-up-my-plugin` skill once per machine to write the global instruction files. It copies the principles from the `minimalist-engineering` skill into `~/AGENTS.md` for Claude Code and `~/.copilot/copilot-instructions.md` for Copilot CLI.
 
 It also installs a global `commit-msg` hook through `~/.git-templates/hooks` and configures `git config --global core.hooksPath` to point there. The shared `hooks/git/commit-msg` hook removes `Co-authored-by` and `Generated-by` lines from commit messages so local history stays clean even when AI tools try to add trailers.
 
@@ -37,16 +33,14 @@ Linking plugin skills into /Users/your-user/.copilot/skills
   linked ask-matt
   ...
   linked writing-for-agents
-Linked: /Users/your-user/.claude/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
-Linked: /Users/your-user/.claude/CLAUDE.md -> /path/to/your/dotfiles/AGENTS.md
-Linked: /Users/your-user/.copilot/AGENTS.md -> /path/to/your/dotfiles/AGENTS.md
 Configured git core.hooksPath: /Users/your-user/.git-templates/hooks
 Linked: /Users/your-user/.git-templates/hooks/commit-msg -> /path/to/your/dotfiles/hooks/git/commit-msg
 
 Install complete. Restart your agent tools or start a new session to pick up the skills.
+Then run the set-up-my-plugin skill to write the global instruction files.
 ```
 
-To update your own skills or the commit hook, edit it in this repository. Start a new session, or run `/reload-plugins` in Claude Code. Rerun `./install.sh` if you changed the instructions, the hook, or the Copilot links. The plugin loads from this checkout, so a `git pull` takes effect the same way.
+To update your own skills or the commit hook, edit it in this repository. Start a new session, or run `/reload-plugins` in Claude Code. Rerun `./install.sh` if you changed the hook or the Copilot links. Rerun the `set-up-my-plugin` skill after you edit `minimalist-engineering`, because the global files hold a copy. The plugin loads from this checkout, so a `git pull` takes effect the same way.
 
 Personal agents or persona-specific instruction files should live outside this repository. For example, a standalone personal coach agent can live at `~/trening/AGENTS.md` instead of under `plugins/my-plugin/skills/`.
 

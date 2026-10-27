@@ -9,7 +9,6 @@ PLUGIN_DIR="$SCRIPT_DIR/plugins/$PLUGIN_NAME"
 SOURCE_SKILLS_DIR="$PLUGIN_DIR/skills"
 SOURCE_HOOKS_DIR="$SCRIPT_DIR/hooks/git"
 SOURCE_COMMIT_MSG_HOOK="$SOURCE_HOOKS_DIR/commit-msg"
-SOURCE_AGENTS_MD="$SCRIPT_DIR/AGENTS.md"
 GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
 TARGET_COMMIT_MSG_HOOK="$GLOBAL_HOOKS_DIR/commit-msg"
 OLD_MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
@@ -21,22 +20,10 @@ if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$SOURCE_AGENTS_MD" ]]; then
-  printf 'Expected instruction file at %s\n' "$SOURCE_AGENTS_MD" >&2
-  exit 1
-fi
-
 if [[ ! -f "$SOURCE_COMMIT_MSG_HOOK" ]]; then
   printf 'Expected git commit-msg hook at %s\n' "$SOURCE_COMMIT_MSG_HOOK" >&2
   exit 1
 fi
-
-# Both names point at the same file. Claude Code reads CLAUDE.md, other agents read AGENTS.md.
-INSTRUCTION_TARGETS=(
-  "$HOME/.claude/AGENTS.md"
-  "$HOME/.claude/CLAUDE.md"
-  "$HOME/.copilot/AGENTS.md"
-)
 
 # Remove links that earlier versions of this installer created: links into this repo, links into
 # the old mattpocock clone, and links that no longer resolve. Links to other sources stay.
@@ -105,27 +92,6 @@ register_claude_plugin() {
   claude plugin install "$PLUGIN_NAME@$MARKETPLACE_NAME"
 }
 
-link_instructions() {
-  local target
-  for target in "${INSTRUCTION_TARGETS[@]}"; do
-    mkdir -p "$(dirname "$target")"
-
-    if [[ -L "$target" ]]; then
-      if [[ "$(readlink "$target")" == "$SOURCE_AGENTS_MD" ]]; then
-        printf 'Already linked: %s -> %s\n' "$target" "$SOURCE_AGENTS_MD"
-        continue
-      fi
-      rm "$target"
-    elif [[ -e "$target" ]]; then
-      printf 'Replacing existing file: %s\n' "$target"
-      rm -rf "$target"
-    fi
-
-    ln -s "$SOURCE_AGENTS_MD" "$target"
-    printf 'Linked: %s -> %s\n' "$target" "$SOURCE_AGENTS_MD"
-  done
-}
-
 ensure_global_hooks_path() {
   local current
   current="$(git config --global --get core.hooksPath || true)"
@@ -175,9 +141,7 @@ clean_old_links "$CLAUDE_SKILLS_DIR"
 register_claude_plugin
 link_copilot_skills
 
-link_instructions
-
 ensure_global_hooks_path
 link_commit_msg_hook
 
-printf '\nInstall complete. Restart your agent tools or start a new session to pick up the skills.\n'
+printf '\nInstall complete. Restart your agent tools or start a new session to pick up the skills.\nThen run the set-up-my-plugin skill to write the global instruction files.\n'
