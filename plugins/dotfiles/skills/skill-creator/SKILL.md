@@ -1,13 +1,13 @@
 ---
 name: skill-creator
-description: Create, review, and improve skills in this repository for GitHub Copilot CLI and Claude Code. Use when drafting a new skill, revising an existing skill under skills/, tightening trigger boundaries, or making a skill leaner and more portable.
+description: Create, review, and improve skills in this repository for GitHub Copilot CLI and Claude Code. Use when drafting a new skill, revising an existing skill under plugins/dotfiles/skills/, tightening trigger boundaries, or making a skill leaner and more portable.
 license: MIT
 compatibility: Claude Code, GitHub Copilot CLI
 ---
 
 # Skill Creator
 
-Create clear, portable skills for this repository's `skills/` directory.
+Create clear, portable skills for this repository's `plugins/dotfiles/skills/` directory.
 
 ## What I do
 
@@ -25,7 +25,7 @@ Use this skill when you need to create a new skill, revise an existing skill, im
 
 In this repository, "create a skill" means:
 
-- create or edit it under `skills/<skill-name>/`
+- create or edit it under `plugins/dotfiles/skills/<skill-name>/`
 - make it work in both GitHub Copilot CLI and Claude Code unless the user explicitly asks for a host-specific fork
 - use the shared cross-tool frontmatter and structure by default
 
@@ -105,7 +105,7 @@ Extract as much as you can from the current conversation before asking follow-up
 
 Before writing anything:
 
-- inspect `skills/` for nearby patterns, naming conflicts, or existing skills that already solve part of the problem
+- inspect `plugins/dotfiles/skills/` for nearby patterns, naming conflicts, or existing skills that already solve part of the problem
 - reuse conventions already present in this repository
 - if the user wants to modify an existing skill, read it carefully and preserve good parts instead of rewriting blindly
 
@@ -172,7 +172,7 @@ Before considering the work done:
 - make sure the description clearly signals when to use the skill
 - confirm the body is understandable without host-specific knowledge
 - confirm the result still fits the default cross-tool Copilot + Claude setup for this repo
-- tell the user where the skill lives in `skills/<name>/`
+- tell the user where the skill lives in `plugins/dotfiles/skills/<name>/`
 - remind them that changes take effect in a new session or after restart
 
 ## Validation rules
@@ -250,7 +250,7 @@ A shared repo skill is not ready if it:
 
 If the user is working in this repo and has not said otherwise:
 
-- create or edit the skill under `skills/<skill-name>/`
+- create or edit the skill under `plugins/dotfiles/skills/<skill-name>/`
 - make it work for both GitHub Copilot CLI and Claude Code
 - avoid host-specific sections
 - prefer one clean shared skill over multiple near-duplicates

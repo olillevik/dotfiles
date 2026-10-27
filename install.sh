@@ -3,13 +3,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE_SKILLS_DIR="$SCRIPT_DIR/skills"
+PLUGIN_NAME=dotfiles
+PLUGIN_DIR="$SCRIPT_DIR/plugins/$PLUGIN_NAME"
+SOURCE_SKILLS_DIR="$PLUGIN_DIR/skills"
 SOURCE_HOOKS_DIR="$SCRIPT_DIR/hooks/git"
 SOURCE_COMMIT_MSG_HOOK="$SOURCE_HOOKS_DIR/commit-msg"
 SOURCE_AGENTS_MD="$SCRIPT_DIR/AGENTS.md"
 GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
 TARGET_COMMIT_MSG_HOOK="$GLOBAL_HOOKS_DIR/commit-msg"
-MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
+OLD_MATTPOCOCK_SKILLS_DIR="$HOME/.mattpocock-skills"
+CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
+COPILOT_SKILLS_DIR="$HOME/.copilot/skills"
 
 if [[ ! -d "$SOURCE_SKILLS_DIR" ]]; then
   printf 'Expected skills directory at %s\n' "$SOURCE_SKILLS_DIR" >&2
@@ -26,11 +30,6 @@ if [[ ! -f "$SOURCE_COMMIT_MSG_HOOK" ]]; then
   exit 1
 fi
 
-SKILL_TARGETS=(
-  "$HOME/.copilot/skills"
-  "$HOME/.claude/skills"
-)
-
 # Both names point at the same file. Claude Code reads CLAUDE.md, other agents read AGENTS.md.
 INSTRUCTION_TARGETS=(
   "$HOME/.claude/AGENTS.md"
@@ -38,14 +37,30 @@ INSTRUCTION_TARGETS=(
   "$HOME/.copilot/AGENTS.md"
 )
 
-sync_mattpocock_skills() {
-  if [[ -d "$MATTPOCOCK_SKILLS_DIR/.git" ]]; then
-    printf 'Updating mattpocock/skills at %s\n' "$MATTPOCOCK_SKILLS_DIR"
-    git -C "$MATTPOCOCK_SKILLS_DIR" pull --ff-only
-  else
-    printf 'Cloning mattpocock/skills to %s\n' "$MATTPOCOCK_SKILLS_DIR"
-    git clone --depth=1 https://github.com/mattpocock/skills.git "$MATTPOCOCK_SKILLS_DIR"
-  fi
+# Remove links that earlier versions of this installer created: links into this repo, links into
+# the old mattpocock clone, and links that no longer resolve. Links to other sources stay.
+clean_old_links() {
+  local dir="$1"
+  local link target
+
+  [[ -d "$dir" ]] || return 0
+
+  for link in "$dir"/*; do
+    [[ -L "$link" ]] || continue
+    target="$(readlink "$link")"
+    case "$target" in
+      "$SCRIPT_DIR"/*|"$OLD_MATTPOCOCK_SKILLS_DIR"/*)
+        printf 'Removing link: %s\n' "$link"
+        rm "$link"
+        ;;
+      *)
+        if [[ ! -e "$link" ]]; then
+          printf 'Removing dead link: %s\n' "$link"
+          rm "$link"
+        fi
+        ;;
+    esac
+  done
 }
 
 link_skill_into() {
@@ -65,40 +80,28 @@ link_skill_into() {
   printf '  linked %s\n' "$name"
 }
 
-link_all_skills() {
-  local target_dir="$1"
-  local parent
-  parent="$(dirname "$target_dir")"
-  mkdir -p "$parent"
+link_copilot_skills() {
+  local skill_dir
 
-  # If target is an old whole-directory symlink, remove it so we can make a real dir
-  if [[ -L "$target_dir" ]]; then
-    rm "$target_dir"
+  mkdir -p "$COPILOT_SKILLS_DIR"
+  clean_old_links "$COPILOT_SKILLS_DIR"
+
+  printf 'Linking plugin skills into %s\n' "$COPILOT_SKILLS_DIR"
+  for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
+    [[ -f "$skill_dir/SKILL.md" ]] || continue
+    link_skill_into "${skill_dir%/}" "$COPILOT_SKILLS_DIR"
+  done
+}
+
+register_claude_plugin() {
+  if ! command -v claude >/dev/null 2>&1; then
+    printf 'claude not found, skipping the Claude Code plugin\n' >&2
+    return 0
   fi
-  mkdir -p "$target_dir"
 
-  # Upstream renames and deletions leave symlinks pointing at nothing.
-  local dead
-  while IFS= read -r -d '' dead; do
-    printf 'Removing dead symlink: %s\n' "$dead"
-    rm "$dead"
-  done < <(find "$target_dir" -maxdepth 1 -type l ! -exec test -e {} \; -print0)
-
-  printf 'Linking local skills into %s\n' "$target_dir"
-  while IFS= read -r -d '' skill_md; do
-    link_skill_into "$(dirname "$skill_md")" "$target_dir"
-  done < <(find "$SOURCE_SKILLS_DIR" -maxdepth 2 -name SKILL.md -print0)
-
-  printf 'Linking mattpocock skills into %s\n' "$target_dir"
-  while IFS= read -r -d '' skill_md; do
-    local skill_dir
-    skill_dir="$(dirname "$skill_md")"
-    # Skip deprecated and in-progress categories
-    case "$skill_dir" in
-      *deprecated*|*in-progress*) continue ;;
-    esac
-    link_skill_into "$skill_dir" "$target_dir"
-  done < <(find "$MATTPOCOCK_SKILLS_DIR/skills" -name SKILL.md -print0)
+  printf 'Registering %s with Claude Code\n' "$SCRIPT_DIR"
+  claude plugin marketplace add "$SCRIPT_DIR"
+  claude plugin install "$PLUGIN_NAME@$PLUGIN_NAME"
 }
 
 link_instructions() {
@@ -167,15 +170,13 @@ link_commit_msg_hook() {
   printf 'Linked: %s -> %s\n' "$TARGET_COMMIT_MSG_HOOK" "$SOURCE_COMMIT_MSG_HOOK"
 }
 
-sync_mattpocock_skills
-
-for target in "${SKILL_TARGETS[@]}"; do
-  link_all_skills "$target"
-done
+clean_old_links "$CLAUDE_SKILLS_DIR"
+register_claude_plugin
+link_copilot_skills
 
 link_instructions
 
 ensure_global_hooks_path
 link_commit_msg_hook
 
-printf '\nInstall complete. Restart your agent tools or start a new session to pick up the shared skills.\n'
+printf '\nInstall complete. Restart your agent tools or start a new session to pick up the skills.\n'

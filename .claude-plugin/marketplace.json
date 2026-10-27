@@ -1,0 +1,14 @@
+{
+  "name": "dotfiles",
+  "owner": {
+    "name": "olillevik"
+  },
+  "description": "Claude Code plugins from the dotfiles repository.",
+  "plugins": [
+    {
+      "name": "dotfiles",
+      "source": "./plugins/dotfiles",
+      "description": "Personal skills, plus engineering skills pinned to one mattpocock/skills commit."
+    }
+  ]
+}
