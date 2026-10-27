@@ -1,47 +1,49 @@
-# Install Shared Skills On Mac
+# Shared skills
 
-This repository holds shared skills for GitHub Copilot CLI and Claude Code, and a git commit hook.
+This repository holds shared skills for GitHub Copilot CLI and Claude Code.
 
-The skills live in one Claude Code plugin, `plugins/my-plugin`. It has two kinds of skills:
+The skills live in one plugin, `plugins/my-plugin`. It has two kinds of skills:
 
 - Your own skills, as real folders in `plugins/my-plugin/skills/`.
 - Upstream skills, as symlinks into pinned copies of upstream commits. The engineering skills from [mattpocock/skills](https://github.com/mattpocock/skills) are in `plugins/my-plugin/upstream-mattpocock/`, and `show-me` from [humanlayer/skills](https://github.com/humanlayer/skills) is in `plugins/my-plugin/upstream-humanlayer/`. Each copy records its commit in a `PIN.md` file.
 
-`install.sh` registers this checkout as a Claude Code marketplace, installs the `my-plugin` plugin, and links the same skills into `~/.copilot/skills`. It does not create, change, or delete any `AGENTS.md` or `CLAUDE.md` file.
+## Install the plugin
 
-Run the `set-up-my-plugin` skill once per machine to write the global instruction files. It copies the principles from the `minimalist-engineering` skill into `~/AGENTS.md` for Claude Code and `~/.copilot/copilot-instructions.md` for Copilot CLI.
-
-It also installs a global `commit-msg` hook through `~/.git-templates/hooks` and configures `git config --global core.hooksPath` to point there. The shared `hooks/git/commit-msg` hook removes `Co-authored-by` and `Generated-by` lines from commit messages so local history stays clean even when AI tools try to add trailers.
-
-The installer removes the skill links that earlier versions created in `~/.claude/skills` and `~/.copilot/skills`, including links into the old `~/.mattpocock-skills` clone. Links to other sources, such as `~/.agents`, stay.
-
-Run these commands from the repository root:
+Claude Code:
 
 ```bash
-chmod +x install.sh
-./install.sh
+claude plugin marketplace add olillevik/dotfiles
+claude plugin install my-plugin@dotfiles
 ```
 
-Expected output, shortened:
+If you registered an earlier checkout of this repository as a marketplace, remove it first with `claude plugin marketplace remove dotfiles`.
 
-```text
-Removing link: /Users/your-user/.claude/skills/tdd
-Registering /path/to/your/dotfiles with Claude Code
-Adding marketplace…✔ Successfully added marketplace: dotfiles (declared in user settings)
-Installing plugin "my-plugin@dotfiles"...✔ Successfully installed plugin: my-plugin@dotfiles (scope: user)
-Linking plugin skills into /Users/your-user/.copilot/skills
-  linked ask-matt
-  ...
-  linked writing-for-agents
-Configured git core.hooksPath: /Users/your-user/.git-templates/hooks
-Linked: /Users/your-user/.git-templates/hooks/commit-msg -> /path/to/your/dotfiles/hooks/git/commit-msg
+Copilot CLI:
 
-Install complete. Restart your agent tools or start a new session to pick up the skills.
-Then run the set-up-my-plugin skill to write the global instruction files.
+```bash
+copilot plugin install olillevik/dotfiles:plugins/my-plugin
 ```
 
-To update your own skills or the commit hook, edit it in this repository. Start a new session, or run `/reload-plugins` in Claude Code. Rerun `./install.sh` if you changed the hook or the Copilot links. Rerun the `set-up-my-plugin` skill after you edit `minimalist-engineering`, because the global files hold a copy. The plugin loads from this checkout, so a `git pull` takes effect the same way.
+Start a new session afterwards.
+
+## Set up a machine
+
+Clone this repository, then run the `set-up-my-plugin` skill from that checkout once per machine. It copies the principles from the `minimalist-engineering` skill into `~/AGENTS.md` for Claude Code and `~/.copilot/copilot-instructions.md` for Copilot CLI.
+
+## Set up hooks in a clone
+
+Run the `set-up-hooks` skill once in each clone you commit from. It installs a `commit-msg` hook that removes Claude and Copilot co-author lines, and a `pre-commit` hook that runs the repo's tests when it has any. The hooks live in that clone only, and the skill never changes `core.hooksPath`.
+
+## Update
+
+After you push changes, update the installed plugins:
+
+```bash
+claude plugin marketplace update dotfiles
+claude plugin update my-plugin@dotfiles
+copilot plugin update my-plugin
+```
+
+Then restart Claude Code and start a new Copilot CLI session. Rerun `set-up-my-plugin` after you edit `minimalist-engineering`, because the global files hold a copy. To update the upstream skills, follow [docs/updating-upstream-skills.md](docs/updating-upstream-skills.md).
 
 Personal agents or persona-specific instruction files should live outside this repository. For example, a standalone personal coach agent can live at `~/trening/AGENTS.md` instead of under `plugins/my-plugin/skills/`.
-
-To update the upstream skills, follow [docs/updating-upstream-skills.md](docs/updating-upstream-skills.md).

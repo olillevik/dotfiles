@@ -34,7 +34,7 @@ If a linked skill is missing upstream at the new commit, the script stops and le
 
 ## After the merge
 
-Pull `main` in each checkout, then start a new agent session or run `/reload-plugins`. The plugin reads the checkout.
+After the merge, update the plugins as the README's Update section describes.
 
 ## Add or remove a skill
 
@@ -46,7 +46,7 @@ To take a skill that the upstream copy already has, copy its folder from the pin
 2. Add `PIN.md` with `Upstream`, `Commit`, and `Committed` lines. Copy an existing `PIN.md` and change the values.
 3. Copy the upstream `LICENSE` into the folder.
 4. Copy each skill folder to the same path it has upstream, and add a symlink in `plugins/my-plugin/skills/` with the target `../upstream-<name>/<path>`.
-5. Run `scripts/update-upstream.sh upstream-<name> --dry-run` to check the copy, then run `./install.sh` so Copilot picks up the new skills.
+5. Run `scripts/update-upstream.sh upstream-<name> --dry-run` to check the copy. After the change is merged, update the plugins as the README's Update section describes.
 
 ## Do not edit a copy by hand
 
